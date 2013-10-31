@@ -1,4 +1,4 @@
-stream.nexum.ws
-===============
+messages.nexum.ws
+=================
 
-Streaming server for twitter
+One inbox to rule them all!
