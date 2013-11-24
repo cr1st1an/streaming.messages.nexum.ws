@@ -96,8 +96,10 @@ class EpiDatabase {
     }
 
     private function init() {
+        if ($this->dbh)
+            return;
+
         try {
-            $this->dbh = null;
             $this->dbh = new PDO($this->_type . ':host=' . $this->_host . ';dbname=' . $this->_name, $this->_user, $this->_pass);
             $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (Exception $e) {

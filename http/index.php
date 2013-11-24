@@ -28,11 +28,11 @@ define('TWITTER_CONSUMER_SECRET', getConfig()->get('twitter')->consumer_secret);
 
 include_once Epi::getPath('data') . 'db_accounts.php';
 include_once Epi::getPath('data') . 'db_streams.php';
-include_once Epi::getPath('data') . 'db_threads.php';
+include_once Epi::getPath('data') . 'db_messages.php';
 
 include_once Epi::getPath('data') . 'mc_accounts.php';
 include_once Epi::getPath('data') . 'mc_streams.php';
-include_once Epi::getPath('data') . 'mc_threads.php';
+include_once Epi::getPath('data') . 'mc_messages.php';
 
 include_once Epi::getPath('lib') . 'Streaming.php';
 
@@ -83,10 +83,9 @@ if ($go) {
 }
 
 if ($go) {
-
+    echo "The new stream has been registered";
+    
     $Streaming = new Streaming($account_data['credentials']['oauth_token'], $account_data['credentials']['oauth_token_secret']);
     $Streaming->setAccount($account_data);
     $Streaming->consume();
-
-    echo "The new stream has been registered";
 }

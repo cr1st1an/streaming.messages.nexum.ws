@@ -11,27 +11,33 @@ class Streaming extends UserstreamPhirehose {
     public function enqueueStatus($status) {
         if (0 === strpos($status, '{"direct_message')) {
             $status_data = json_decode($status, true);
-            $identifier = ($status_data['direct_message']['sender_id'] == $this->_account['identifier']) ? null : $status_data['direct_message']['sender_id'];
-            if (null != $identifier) {
-                $MC_Threads = new MC_Threads();
-                $thread_data = array(
+            if (isset($status_data['direct_message'])) {
+                $dm_data = $status_data['direct_message'];
+
+                $MC_Messages = new MC_Messages();
+                $message_data = array(
                     'id_account' => $this->_account['id_account'],
-                    'identifier' => $identifier,
-                    'network' => 'twitter',
-                    'opened' => false,
-                    'outdated' => true
+                    'created' => date("Y-m-d H:i:s", strtotime($dm_data['created_at'])),
+                    'identifier' => $dm_data['id'],
+                    'sender_id' => $dm_data['sender_id'],
+                    'recipient_id' => $dm_data['recipient_id'],
+                    'text' => $dm_data['text']
                 );
-                $MC_Threads->insert($thread_data);
-                
-                exec('wget -bqc ' . getConfig()->get('app')->url . '/1.0/services/01?id_account='.$this->_account['id_account']);
-                echo json_encode($thread_data) . "\n";
+                $r_insert = $MC_Messages->insert($message_data);
+                if ($r_insert['success']) {
+                    if ($dm_data['sender_id'] != $this->_account['identifier']) {
+                        $id_message = $r_insert['id_message'];
+                        exec('wget -bqc ' . getConfig()->get('app')->url . '/1.0/workers/02 --post-data "i01=' . $id_message . '&i02=' . md5($id_message . $message_data['identifier']) . '"');
+                        echo 'wget -bqc ' . getConfig()->get('app')->url . '/1.0/workers/02 --post-data "i01=' . $id_message . '&i02=' . md5($id_message . $message_data['identifier']) . '"' . "\n";
+                        echo json_encode($message_data) . "\n";
+                    }
+                }
             }
         }
     }
 
     protected function log($message, $level = 'notice') {
-        if ('error' == $level || 'server' == $level)
-            echo 'Phirehose: ' . $message;
+        echo 'Phirehose: ' . $message . "\n";
     }
 
 }
